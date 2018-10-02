@@ -20,7 +20,7 @@ powersProduct :: Floating a => [a] -> [a] -> a
 powersProduct powers values = product (zipWith (**) values powers)
 
 sigmaOfPowersProduct :: Floating a => [a] -> [a] -> [a] -> a
-sigmaOfPowersProduct powers values sigmas = powersProduct powers values * (sqrt . sum $ zipWith (*) (map (^2) powers) (zipWith (/) sigmas (map (^2) values)))
+sigmaOfPowersProduct powers values sigmas = powersProduct powers values * (sqrt . sum $ map (**2) (zipWith (*) powers (zipWith (/) sigmas values)))
 
 data ValueSigma a where
     ValueSigma :: RealFrac a => a -> a -> ValueSigma a -- why RealFrac?
@@ -42,7 +42,7 @@ main = do
     let volume = powersProduct (repeat 1) averages
     let volumeSigma = sigmaOfPowersProduct (repeat 1) averages sigmasFull
 
-    let fmt = join . intersperse ", " . map (TL.unpack . format (fixed 3))
+    let fmt = join . intersperse ", " . map (TL.unpack . format (fixed 2))
     putStrLn ("averages: " <> fmt averages)
     putStrLn ("sigmas: " <> fmt sigmas)
     putStrLn ("sigmasFull: " <> fmt sigmasFull)

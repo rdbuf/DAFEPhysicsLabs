@@ -20,7 +20,9 @@ powersProduct :: Floating a => [a] -> [a] -> a
 powersProduct powers values = product (zipWith (**) values powers)
 
 sigmaOfPowersProduct :: Floating a => [a] -> [a] -> [a] -> a
-sigmaOfPowersProduct powers values sigmas = powersProduct powers values * (sqrt . sum $ zipWith (*) (map (^2) powers) (zipWith (/) sigmas (map (^2) values)))
+sigmaOfPowersProduct powers values sigmas = powersProduct powers values * (sqrt . sum $ map (**2) (zipWith (*) powers (zipWith (/) sigmas values)))
+-- sigmaOfPowersProduct powers values sigmas = sqrt . sum $ zipWith (*) (map (^2) powers) (zipWith (/) sigmas (map (^2) values))
+-- sigmaOfPowersProduct powers values sigmas = powersProduct powers values * (sqrt . sum $ zipWith (*) (map (^2) powers) (zipWith (/) sigmas (map (^2) values)))
 
 data ValueSigma a where
     ValueSigma :: RealFrac a => a -> a -> ValueSigma a -- why RealFrac?
@@ -37,12 +39,12 @@ main = do
 
     let averages = map average measurements
     let sigmas = map sigma measurements
-    let sigmasFull = map (mergeSigmas systematicError) (drop 1 sigmas) <> [last sigmas]
+    let sigmasFull = map (mergeSigmas systematicError) sigmas
 
     let volume = powersProduct [1,2,1] averages
-    let volumeSigma = sigmaOfPowersProduct [1,2,1] averages sigmasFull
+    let volumeSigma = sigmaOfPowersProduct [1,2] averages sigmasFull
 
-    let fmt = join . intersperse ", " . map (TL.unpack . format (fixed 3))
+    let fmt = join . intersperse ", " . map (TL.unpack . format (fixed 2))
     putStrLn ("averages: " <> fmt averages)
     putStrLn ("sigmas: " <> fmt sigmas)
     putStrLn ("sigmasFull: " <> fmt sigmasFull)

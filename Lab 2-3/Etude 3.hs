@@ -21,14 +21,14 @@ powersProduct :: Floating a => [a] -> [a] -> a
 powersProduct powers values = product (zipWith (**) values powers)
 
 sigmaOfPowersProduct :: Floating a => [a] -> [a] -> [a] -> a
-sigmaOfPowersProduct powers values sigmas = powersProduct powers values * (sqrt . sum $ zipWith (*) (map (^2) powers) (zipWith (/) sigmas (map (^2) values)))
+sigmaOfPowersProduct powers values sigmas = powersProduct powers values * (sqrt . sum $ map (**2) (zipWith (*) powers (zipWith (/) sigmas values)))
 
 data ValueSigma a where
     ValueSigma :: RealFrac a => a -> a -> ValueSigma a -- why RealFrac?
 
 instance Show (ValueSigma a) where
     show (ValueSigma value sigma) = fmt value <> " ± " <> fmt sigma where
-        numberOfDigits = 3 -- the precision should be 10-20%, how can we achieve this?
+        numberOfDigits = 2 -- the precision should be 10-20%, how can we achieve this?
         fmt = TL.unpack . format (fixed numberOfDigits)
 
 main = do
@@ -43,7 +43,7 @@ main = do
     let mass = average averages
     let massSigma = foldl1 mergeSigmas sigmasFull
 
-    let fmt = TL.unpack . format (fixed 3)
+    let fmt = TL.unpack . format (fixed 2)
     putStr . unlines $ zipWith (<>) [x <> " плечо:\n" | x <- ["Левое", "Правое"]]
         (map (unlines . zipWith (<>) [x <> " = " | x <- ["m ср.", "σ", "σ полн."]] . map fmt) (transpose [averages, sigmas, sigmasFull]))
     putStrLn $ "m = " <> show (ValueSigma mass massSigma)
